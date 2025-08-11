@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<!--
+██████╗░██╗░░░██╗  ██╗░░██╗███╗░░░███╗
+██╔══██╗╚██╗░██╔╝  ██║░██╔╝████╗░████║
+██████╦╝░╚████╔╝░  █████═╝░██╔████╔██║
+██╔══██╗░░╚██╔╝░░  ██╔═██╗░██║╚██╔╝██║
+██████╦╝░░░██║░░░  ██║░╚██╗██║░╚═╝░██║
+╚═════╝░░░░╚═╝░░░  ╚═╝░░╚═╝╚═╝░░░░░╚═╝
+-->
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Melih Korkmaz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  body {
+    margin: 0; padding: 20px;
+    background: #121212;
+    color: #0ff;
+    font-family: 'Press Start 2P', cursive;
+    user-select: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 40px;
+    height: 90vh;
+    overflow: hidden;
+  }
+  h1, h2 {
+    text-align: center;
+    text-shadow: 0 0 10px #0ff;
+  }
+  #cvContainer {
+    flex: 1;
+    max-width: 600px;
+    background: #002222;
+    border: 3px solid #0ff;
+    border-radius: 10px;
+    padding: 20px;
+    overflow-y: auto;
+    height: 100%;
+  }
+  .cv-section {
+    margin-bottom: 35px;
+    border-bottom: 2px dashed #0ff;
+    padding-bottom: 20px;
+    position: relative;
+  }
+  .cv-section h3 {
+    margin: 0 0 10px 0;
+    border-bottom: 2px solid #0ff;
+    padding-bottom: 5px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .lock-info {
+    display: flex;
+    align-items: center;
+    color: #f90;
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .lock-info svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 5px;
+    fill: #f90;
+  }
+  .cv-section ul {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+  }
+  .cv-section ul li {
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .cv-section ul li::before {
+    content: "▶";
+    position: absolute;
+    left: 0;
+    color: #0ff;
+    font-size: 12px;
+  }
+  .locked .locked-content {
+    display: none;
+  }
+  .unlocked .locked-content {
+    display: block;
+  }
+  .unlocked h3 .lock-info {
+    display: none;
+  }
+
+  #gameAreaContainer {
+    flex: 1;
+    max-width: 650px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 90vh;
+    position: relative;
+  }
+  #gameTitle {
+    margin-bottom: 10px;
+  }
+  #gameArea {
+    width: 600px;
+    height: 300px;
+    background: #000;
+    border: 4px solid #0ff;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+  }
+  #gameArea.mouse-hidden {
+    cursor: none;
+  }
+  #player {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    background: #0ff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #0ff;
+    user-select: none;
+  }
+  .coin {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: yellow;
+    border-radius: 50%;
+    box-shadow: 0 0 8px gold;
+  }
+  #scoreBoard {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-top: 12px;
+    color: #0ff;
+    text-shadow: 0 0 8px #0ff;
+  }
+  #info {
+    margin-top: 8px;
+    font-size: 1rem;
+    color: #f90;
+    text-shadow: 0 0 5px #f90;
+  }
+  @keyframes explode {
+    0% { transform: scale(1); opacity: 1; box-shadow: 0 0 10px #0ff; }
+    50% { transform: scale(3) rotate(90deg); opacity: 0.7; box-shadow: 0 0 40px #f90, 0 0 60px #f90; }
+    100% { transform: scale(0); opacity: 0; box-shadow: none; }
+  }
+  .explode {
+    animation: explode 1s forwards;
+  }
+  #socialLinks {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+    flex-direction: column;
+    gap: 15px;
+    background: rgba(0, 34, 34, 0.9);
+    padding: 25px 50px;
+    border-radius: 15px;
+    border: 3px solid #0ff;
+    z-index: 10;
+    width: 300px;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  #socialLinks.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #socialLinks a {
+    color: #0ff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.3rem;
+    text-decoration: none;
+    text-shadow: 0 0 8px #0ff;
+    border: 2px solid #0ff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+  #socialLinks a:hover {
+    color: #f90;
+    border-color: #f90;
+    text-shadow: 0 0 15px #f90;
+  }
+
+  @media (max-width: 768px) {
+    html, body {
+      height: auto !important;
+      overflow-y: auto !important;
+    }
+    body {
+      flex-direction: column;
+      padding: 10px;
+    }
+    #gameAreaContainer {
+      display: none !important;
+    }
+    #cvContainer {
+      max-width: 100% !important;
+      flex: none !important;
+      height: auto !important;
+    }
+    .locked {
+      display: block !important;
+      pointer-events: auto !important;
+      opacity: 1 !important;
+    }
+    .locked .locked-content {
+      display: block !important;
+    }
+    .locked h3 .lock-info {
+      display: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="cvContainer">
+  <h1>Melih Korkmaz | Game Developer</h1>
+  <div id="section1" class="cv-section">
+    <h3>Hakkımda</h3>
+    <p>Oyun geliştirmeye büyük tutku duyan, Unity ve Unreal Engine platformlarında yazılım geliştirme konusunda sağlam temel bilgiye sahip bir oyun geliştiriciyim. 3D PC oyunları alanında kendimi geliştirmekteyim ve farklı programlama dillerini öğrenerek teknik becerilerimi sürekli artırıyorum. Google Oyun ve Uygulama Akademisi mezunu olarak, modern oyun geliştirme süreçleri hakkında bilgi sahibiyim ve gerçek dünya projelerinde deneyim kazanmak için hevesliyim. Yaratıcı ve çözüm odaklı yaklaşımımla, takım çalışmasına ve yeni teknolojilere hızlı adaptasyona açığım.</p>
+  </div>
+
+  <div id="section2" class="cv-section locked" data-lockmsg="5 altın topla açılır">
+    <h3>
+      Beceriler
+      <span class="lock-info">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2a5 5 0 0 0-5 5v3h-.5A2.5 2.5 0 0 0 4 12.5v7A2.5 2.5 0 0 0 6.5 22h11a2.5 2.5 0 0 0 2.5-2.5v-7a2.5 2.5 0 0 0-2.5-2.5H17V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/>
+        </svg>
+        5 altın topla açılır
+      </span>
+    </h3>
+    <div class="locked-content">
+      <ul>
+        <li>Unity, Unreal Engine</li>
+        <li>C#, C++</li>
+        <li>Python</li>
+        <li>HTML, CSS, JS</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="section3" class="cv-section locked" data-lockmsg="10 altın topla açılır">
+    <h3>
+      Eğitim & İletişim
+      <span class="lock-info">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2a5 5 0 0 0-5 5v3h-.5A2.5 2.5 0 0 0 4 12.5v7A2.5 2.5 0 0 0 6.5 22h11a2.5 2.5 0 0 0 2.5-2.5v-7a2.5 2.5 0 0 0-2.5-2.5H17V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 1 1 6 0v3H9Z"/>
+        </svg>
+        10 altın topla açılır
+      </span>
+    </h3>
+    <div class="locked-content">
+      <ul>
+        <li>Bozok Üniversitesi Bilgisayar Mühendisliği</li>
+        <li>Google Oyun ve Uygulama Akademisi</li>
+        <li>Email: melihkorkmaz46@gmail.com</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="gameAreaContainer">
+  <h2 id="gameTitle">Altınları Topla ve CV Kilidini Aç!</h2>
+  <div id="gameArea">
+    <div id="player"></div>
+    <div id="socialLinks">
+      <a href="https://github.com/kmmelih" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="https://instagram.com/kmmelih" target="_blank" rel="noopener noreferrer">Instagram</a>
+    </div>
+  </div>
+  <div id="scoreBoard">Puan: 0</div>
+  <div id="info">Bölüm 2 için 5 altın topla.</div>
+</div>
+
+<script>
+  const player = document.getElementById('player');
+  const gameArea = document.getElementById('gameArea');
+  const scoreBoard = document.getElementById('scoreBoard');
+  const info = document.getElementById('info');
+  const socialLinks = document.getElementById('socialLinks');
+  const section2 = document.getElementById('section2');
+  const section3 = document.getElementById('section3');
+  let playerPos = 10, coins = [], score = 0, gameStage = 1, gameOver = false;
+
+  function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) {
+      document.getElementById('gameAreaContainer').style.display = 'none';
+      section2.classList.replace('locked', 'unlocked');
+      section3.classList.replace('locked', 'unlocked');
+      gameOver = true;
+    } else {
+      startGame();
+      gameLoop();
+      setInterval(() => {
+        if(gameStage < 3 && !gameOver) createCoin();
+      }, 1200);
+    }
+  });
+
+  window.addEventListener('keydown', e => {
+    if(gameOver) return;
+    if (e.key === 'ArrowLeft') playerPos = Math.max(0, playerPos - 20);
+    if (e.key === 'ArrowRight') playerPos = Math.min(gameArea.clientWidth - player.clientWidth, playerPos + 20);
+    player.style.left = playerPos + 'px';
+  });
+
+  gameArea.addEventListener('mousemove', e => {
+    if(gameOver) return;
+    const rect = gameArea.getBoundingClientRect();
+    let x = e.clientX - rect.left - player.clientWidth / 2;
+    playerPos = Math.max(0, Math.min(x, gameArea.clientWidth - player.clientWidth));
+    player.style.left = playerPos + 'px';
+  });
+
+  gameArea.addEventListener('mouseenter', () => { if(!gameOver) gameArea.classList.add('mouse-hidden'); });
+  gameArea.addEventListener('mouseleave', () => { if(!gameOver) gameArea.classList.remove('mouse-hidden'); });
+
+  function createCoin() {
+    const coin = document.createElement('div');
+    coin.classList.add('coin');
+    coin.style.left = Math.random() * (gameArea.clientWidth - 20) + 'px';
+    coin.style.top = '0px';
+    gameArea.appendChild(coin);
+    coins.push(coin);
+  }
+
+  function gameLoop() {
+    if(gameOver) return;
+    for(let i = coins.length - 1; i >= 0; i--) {
+      let coin = coins[i], top = parseFloat(coin.style.top);
+      coin.style.top = top + 3 + 'px';
+      if(top > gameArea.clientHeight) {
+        coin.remove(); coins.splice(i, 1);
+      } else {
+        const coinRect = coin.getBoundingClientRect(), playerRect = player.getBoundingClientRect();
+        if(!(coinRect.right < playerRect.left || coinRect.left > playerRect.right || coinRect.bottom < playerRect.top || coinRect.top > playerRect.bottom)) {
+          coin.remove(); coins.splice(i, 1); score++;
+          scoreBoard.textContent = 'Puan: ' + score;
+          checkScore();
+        }
+      }
+    }
+    requestAnimationFrame(gameLoop);
+  }
+
+  function checkScore() {
+    if(gameStage === 1 && score >= 5) {
+      section2.classList.replace('locked', 'unlocked');
+      info.textContent = "Bölüm 2 açıldı! Şimdi 10 altına ulaş.";
+      gameStage = 2;
+    } 
+    if(gameStage === 2 && score >= 10) {
+      section3.classList.replace('locked', 'unlocked');
+      info.textContent = "Tebrikler! Tüm bölümler açıldı.";
+      gameStage = 3; triggerExplosion();
+    }
+  }
+
+  function triggerExplosion() {
+    gameOver = true; coins.forEach(c => c.remove()); coins = [];
+    player.style.left = (gameArea.clientWidth / 2 - player.clientWidth / 2) + 'px';
+    player.style.bottom = (gameArea.clientHeight / 2 - player.clientHeight / 2) + 'px';
+    player.classList.add('explode');
+    setTimeout(() => {
+      player.style.display = 'none';
+      socialLinks.style.display = 'flex';
+      setTimeout(() => { socialLinks.classList.add('show'); }, 50);
+      gameArea.classList.remove('mouse-hidden');
+    }, 1000);
+  }
+
+  function startGame() {
+    score = 0; scoreBoard.textContent = 'Puan: 0';
+    coins.forEach(c => c.remove()); coins = [];
+    player.style.display = 'block'; player.classList.remove('explode');
+    gameStage = 1; gameOver = false; playerPos = 10;
+    player.style.left = playerPos + 'px'; player.style.bottom = '10px';
+    info.textContent = "Bölüm 2 için 5 altın topla.";
+    socialLinks.style.display = 'none'; socialLinks.classList.remove('show');
+  }
+</script>
+
+</body>
+</html>
